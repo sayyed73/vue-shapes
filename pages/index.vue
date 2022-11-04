@@ -134,7 +134,7 @@ export default {
         console.log(args);
       },
       doubleClick: (args) => {
-        // this.openModal();
+        this.openModal();
       },
     
       // Initialize palette
@@ -238,7 +238,7 @@ export default {
 }
 #diagramEventsControlSection tspan {
   /* Hiding node name on diagram-space */
-  /* display: none; */
+  display: none;
 }
 #symbolpalette_container.e-accordion .e-acrdn-item.e-select>.e-acrdn-header {
   /* changed cursor on symbolpalette as there is no events now */

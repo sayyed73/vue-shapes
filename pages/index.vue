@@ -2,17 +2,23 @@
   <!-- Main container -->
   <div class="container py-4">
     <h2>Basic planning</h2>
+    <div>
+      <ejs-toolbar id='toolbar' style="width:100%; height: 10%; margin-top: 10px;"
+        :clicked='toolbarclicked'
+        :items='toolbaritems'>
+      </ejs-toolbar>
+    </div>
     <div class="row">
-      <div class="col-lg-8 control-section">
+      <div class="col-lg-12 control-section">
         <div id="diagramEventsControlSection" class="content-wrapper" style="width:100%;background: white">
           <div id="diagram-space" class="sb-mobile-diagram">
             <ejs-diagram 
               ref="diagramControl" 
               id="diagram" 
-              width="100%" 
-              height="700px" 
+              :width='width'
+              :height='height'
               :contextMenuSettings="contextMenu" 
-              :snapSettings='snapSettings' 
+              :snapSettings='snapSettings'
               :click="click" 
               :doubleClick="doubleClick" 
             >
@@ -38,6 +44,12 @@
         </div>
       </div>
     </div>
+    <div id="upload-container">
+      <ejs-uploader id="fileupload" name="UploadFiles"       
+        :asyncSettings='fileuploadasyncSettings'
+        :success='fileuploadsuccess'
+        :showFileList ='showFile'/>
+    </div>
 
     <!-- Button trigger modal -->
     <!-- <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal">
@@ -56,7 +68,8 @@
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
           </div>
           <div class="modal-body">
-            <p>Modal body for {{ modalTitle }} text goes here.</p>
+            <input type="text" class="form-control" placeholder="Enter text" />
+            <p>You've written: </p>
           </div>
           <div class="modal-footer">
             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
@@ -69,12 +82,17 @@
 
 <script>
 import Vue from 'vue';
+import { Uploader, UploaderPlugin } from "@syncfusion/ej2-vue-inputs";
 import {
   DiagramPlugin,
   SymbolPalettePlugin,
   Diagram, DiagramContextMenu,
   DiagramConstraints
 } from "@syncfusion/ej2-vue-diagrams";
+import {
+  ToolbarPlugin,
+  Toolbar
+} from "@syncfusion/ej2-vue-navigations";
 import { ListViewPlugin, ListView } from "@syncfusion/ej2-vue-lists";
 import { ButtonPlugin } from "@syncfusion/ej2-vue-buttons";
 
@@ -82,29 +100,28 @@ Vue.use(DiagramPlugin);
 Vue.use(SymbolPalettePlugin);
 Vue.use(ListViewPlugin);
 Vue.use(ButtonPlugin);
+Vue.use(ToolbarPlugin);
+Vue.use(UploaderPlugin);
 
 let diagramInstance;
 
 let basicShapes = [
-  { id: 'Rectangle Box', shape: { type: 'Basic', shape: 'Rectangle' }, annotations: [{content: 'Rectangle Box'}] },
-  { id: 'Ellipse', shape: { type: 'Basic', shape: 'Ellipse' }, annotations: [{content: 'Ellipse'}] },
+  { id: 'Rectangle Box', shape: { type: 'Basic', shape: 'Rectangle' } },
+  { id: 'Ellipse', shape: { type: 'Basic', shape: 'Ellipse' } }, 
   { id: 'Text', shape: { type: 'Basic', shape: 'Text' }, annotations: [{content: 'Text'}] },
-  { id: 'Sync Logo', width: 100, height: 100, shape: { type: 'Image', source: 'https://www.syncfusion.com/content/images/nuget/sync_logo_icon.png', scale: 'None' }, annotations: [{content: 'Sync Logo'}] },
-  { id: 'Chair', width: 100, height: 100, shape: { type: 'Image', source: require('~/assets/images/chair.png'), scale: 'None' }, annotations: [{content: 'Chair'}] },
-  { id: 'Table', width: 100, height: 100, shape: { type: 'Image', source: require('~/assets/images/table.png'), scale: 'None' }, annotations: [{content: 'Table'}] },
-  { id: 'Parallelogram', shape: { type: 'Basic', shape: 'Parallelogram' }, annotations: [{content: 'Parallelogram'}] },
-  { id: 'Triangle', shape: { type: 'Basic', shape: 'Triangle' }, annotations: [{content: 'Triangle'}] },
-  { id: 'Hexagon', shape: { type: 'Basic', shape: 'Hexagon' }, annotations: [{content: 'Hexagon'}] },
-  { id: 'Pentagon', shape: { type: 'Basic', shape: 'Pentagon' }, annotations: [{content: 'Pentagon'}] },
-  { id: 'Cylinder', shape: { type: 'Basic', shape: 'Cylinder' }, annotations: [{content: 'Cylinder'}] },
-  { id: 'Plus', shape: { type: 'Basic', shape: 'Plus' }, annotations: [{content: 'Plus'}] },
-  { id: 'Heptagon', shape: { type: 'Basic', shape: 'Heptagon' }, annotations: [{content: 'Heptagon'}] },
-  { id: 'Octagon', shape: { type: 'Basic', shape: 'Octagon' }, annotations: [{content: 'Octagon'}] },
-  { id: 'Trapezoid', shape: { type: 'Basic', shape: 'Trapezoid' }, annotations: [{content: 'Trapezoid'}] },
-  { id: 'Decagon', shape: { type: 'Basic', shape: 'Decagon' }, annotations: [{content: 'Decagon'}] },
-  { id: 'RightTriangle', shape: { type: 'Basic', shape: 'RightTriangle' }, annotations: [{content: 'RightTriangle'}] },
-  { id: 'Diamond', shape: { type: 'Basic', shape: 'Diamond' }, annotations: [{content: 'Diamond'}] },
-  { id: 'Star', shape: { type: 'Basic', shape: 'Star' }, annotations: [{content: 'Star'}] }
+  { id: 'Parallelogram', shape: { type: 'Basic', shape: 'Parallelogram' } },
+  { id: 'Triangle', shape: { type: 'Basic', shape: 'Triangle' } },
+  { id: 'Hexagon', shape: { type: 'Basic', shape: 'Hexagon' } },
+  { id: 'Pentagon', shape: { type: 'Basic', shape: 'Pentagon' } },
+  { id: 'Cylinder', shape: { type: 'Basic', shape: 'Cylinder' } },
+  { id: 'Plus', shape: { type: 'Basic', shape: 'Plus' } },
+  { id: 'Heptagon', shape: { type: 'Basic', shape: 'Heptagon' } },
+  { id: 'Octagon', shape: { type: 'Basic', shape: 'Octagon' } },
+  { id: 'Trapezoid', shape: { type: 'Basic', shape: 'Trapezoid' } },
+  { id: 'Decagon', shape: { type: 'Basic', shape: 'Decagon' } },
+  { id: 'RightTriangle', shape: { type: 'Basic', shape: 'RightTriangle' } },
+  { id: 'Diamond', shape: { type: 'Basic', shape: 'Diamond' } },
+  { id: 'Star', shape: { type: 'Basic', shape: 'Star' } }
 ];
 
 export default {
@@ -123,9 +140,9 @@ export default {
         if (args.actualObject !== undefined) {
           console.log('click on Node');
           // Name of the node
-          const nodeName = args.element.properties.annotations[0].properties.content;
-          console.log(nodeName);
-          this.modalTitle = nodeName;
+          // const nodeName = args.element.properties.annotations[0].properties.content;
+          // console.log(nodeName);
+          // this.modalTitle = nodeName;
           // Id of the node
           console.log(args.element.properties.id);
         } else {
@@ -168,7 +185,48 @@ export default {
           return { description: { text: symbol.text, overflow: 'Wrap' }};
         }
         return { description: { text: symbol.id }};
-      }
+      },
+      toolbarclicked: (args) => {
+        if (args.item.text === "New") {
+          diagramInstance.clear();
+        } else if (args.item.text === "Load") {
+          let element = document.getElementsByClassName(
+            "e-file-select-wrap"
+          );
+          let htmlButtonElement = element[0].querySelector(
+            "button"
+          );
+          htmlButtonElement.click();
+        } else if (args.item.id === 'palette-icon') {
+          openPalette();
+        } else {
+          download(diagramInstance.saveDiagram());
+        }
+      },
+      toolbaritems: [
+        { text: "New", tooltipText: "New", },
+        {
+          type: "Separator"
+        },
+        {
+          text: "Save",
+          tooltipText: "Save",
+        },
+        {
+          type: "Separator"
+        },
+        {
+          text: "Load",
+          tooltipText: "Load"
+        }
+      ],
+      fileuploadasyncSettings: {
+        saveUrl: "https://aspnetmvc.syncfusion.com/services/api/uploadbox/Save",
+        removeUrl:
+          "https://aspnetmvc.syncfusion.com/services/api/uploadbox/Remove"
+      },
+      fileuploadsuccess: onUploadSuccess,
+      showFile: true
     };
   },
   provide: {
@@ -176,6 +234,8 @@ export default {
   },
   mounted() {
     diagramInstance = this.$refs.diagramControl.ej2Instances;
+    // diagramInstance.fitToPage();
+    // console.log(diagramInstance);
   },
   computed: {
 
@@ -192,17 +252,55 @@ export default {
   },
 };
 
+//save the diagram object in json data.
+function download(data) {
+  let dataStr =
+    "data:text/json;charset=utf-8," + encodeURIComponent(data);
+  let a = document.createElement("a");
+  a.href = dataStr;
+  a.download = "Diagram.json";
+  document.body.appendChild(a);
+  a.click();
+}
+
+function onUploadSuccess(args) {
+  let file1  = args.file;
+  let file= file1.rawFile;
+  let reader = new FileReader();
+  reader.readAsText(file);
+  reader.onloadend = loadDiagram;
+}
+
+//Load the diagraming object.
+function loadDiagram(event) {
+  diagramInstance.loadDiagram((event.target).result);
+}
+
 </script>
 
 
 <style scoped>
-#diagramEventsControlSection .sb-mobile-palette {
-  width: 200px;
+.e-file-select-wrap {
+  display: none;
+}
+#upload-container  {
+  display: none;
+}
+.control-section {
+  padding-top: 0px;
+  padding-right: 0px;
+}
+.sb-mobile-palette {
+  width: 188px;
   height: 100%;
   float: left;
 }
 
-#diagramEventsControlSection .sb-mobile-diagram {
+.sb-mobile-palette-bar {
+  display: none;
+}
+
+.sb-mobile-diagram {
   width: calc(100% - 200px);
   height: 100%;
   float: left;
@@ -238,7 +336,24 @@ export default {
 }
 #diagramEventsControlSection tspan {
   /* Hiding node name on diagram-space */
-  display: none;
+  /* display: none; */
+}
+text[id*='Rectangle'],
+text[id*='Ellipse'],
+text[id*='Parallelogram'],
+text[id*='Triangle'],
+text[id*='Hexagon'],
+text[id*='Pentagon'],
+text[id*='Cylinder'],
+text[id*='Plus'],
+text[id*='Heptagon'],
+text[id*='Octagon'],
+text[id*='Trapezoid'],
+text[id*='Decagon'],
+text[id*='RightTriangle'],
+text[id*='Diamond'],
+text[id*='Star']  {
+  /* display: none;  */
 }
 #symbolpalette_container.e-accordion .e-acrdn-item.e-select>.e-acrdn-header {
   /* changed cursor on symbolpalette as there is no events now */

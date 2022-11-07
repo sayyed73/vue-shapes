@@ -2,6 +2,15 @@
   <!-- Main container -->
   <div class="container py-4">
     <h2>Basic planning</h2>
+    <button type="button" class="btn btn-light" v-on:click="newModel">New</button>
+    <button type="button" class="btn btn-light" v-on:click="saveModel">Save</button>
+    <!-- <button type="button" class="btn btn-light" v-on:click="loadModel">Load</button> -->
+    <select class="form-select" aria-label="Default select example" v-model="selectedModel" v-on:change="changeModel">
+      <option disabled value="" selected>Please select one</option>
+      <option v-for="option in models" v-bind:value="option">
+        {{ option.name }}
+      </option>
+    </select>
     <div>
       <ejs-toolbar id='toolbar' style="width:100%; height: 10%; margin-top: 10px;"
         :clicked='toolbarclicked'
@@ -64,15 +73,16 @@
       <div class="modal-dialog">
         <div class="modal-content">
           <div class="modal-header">
-            <h5 class="modal-title">{{ modalTitle }}</h5>
+            <h5 class="modal-title">Entity</h5>
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
           </div>
           <div class="modal-body">
-            <input type="text" class="form-control" placeholder="Enter text" />
+            <input type="text" class="form-control" placeholder="Enter text" v-model="shapeText" />
             <p>You've written: </p>
           </div>
           <div class="modal-footer">
             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            <button type="button" class="btn btn-primary" data-bs-dismiss="modal" v-on:click="saveShape">Save</button>
           </div>
         </div>
       </div>
@@ -95,6 +105,7 @@ import {
 } from "@syncfusion/ej2-vue-navigations";
 import { ListViewPlugin, ListView } from "@syncfusion/ej2-vue-lists";
 import { ButtonPlugin } from "@syncfusion/ej2-vue-buttons";
+import states from "../data.json";
 
 Vue.use(DiagramPlugin);
 Vue.use(SymbolPalettePlugin);
@@ -128,7 +139,12 @@ export default {
   name: "Home",
   data() {
     return {
-      modalTitle: '',
+      // modalTitle: '',
+      nodeId: '',
+      shapeText: '',
+      selectedModel: '',
+      shapes: [],
+      models: [],
       //Initializes diagram control
       width: "100%",
       height: 700,
@@ -145,6 +161,18 @@ export default {
           // this.modalTitle = nodeName;
           // Id of the node
           console.log(args.element.properties.id);
+          this.nodeId = args.element.properties.id;
+          // this.models.forEach(item => { 
+          //   // const text = item.nodes.find(x => x.id === this.nodeId);
+          //   console.log(item.nodes);
+          // });
+          const node = this.shapes.find(item => item.id === this.nodeId);
+          // console.log(node);
+          node !== undefined ? this.shapeText = node.text : this.shapeText = '';
+          // console.log(this.shapes);
+          // this.shapes.length ? 
+          //   this.shapeText = this.shapes.find(item => item.id === this.nodeId).text
+          //   : this.shapeText = ''
         } else {
           console.log('Click on Diagram');
         }
@@ -236,6 +264,8 @@ export default {
     diagramInstance = this.$refs.diagramControl.ej2Instances;
     // diagramInstance.fitToPage();
     // console.log(diagramInstance);
+    this.models = states;
+    console.log(this.models);
   },
   computed: {
 
@@ -248,6 +278,63 @@ export default {
     paletteExpanding: (args) => {
       // prevent collapse
       args.cancel = true;
+    },
+
+    newModel () {
+      diagramInstance.clear();
+    },
+
+    changeModel () {
+      console.log(this.selectedModel);
+      let diagram = document.getElementById('diagram');
+      diagram = diagram.ej2_instances[0];
+      diagram.loadDiagram(JSON.stringify(this.selectedModel));
+    },
+
+    // loadModel (event) {
+    //   let diagram = document.getElementById('diagram');
+    //   diagram = diagram.ej2_instances[0];
+    //   diagram.loadDiagram(JSON.stringify(this.models));
+    //   console.log(this.models);
+    // },
+
+    saveShape () {
+      const index = this.shapes.findIndex(item => item.id === this.nodeId);
+      if (index === -1 ) {
+        this.shapes.push({
+          id: this.nodeId,
+          text: this.shapeText
+        });
+      } else {
+        this.shapes[index].text = this.shapeText;
+      }
+      console.log(this.shapes);
+    },
+    
+    saveModel () {
+      let diagram = document.getElementById('diagram');
+      diagram = diagram.ej2_instances[0];
+      const data = diagram.saveDiagram();
+      // console.log(JSON.parse(data));
+      const savedData = JSON.parse(data);
+      // const node = savedData.nodes.find(item => item.id === this.nodeId);
+      // node.entityText = this.shapeText;
+      console.log(savedData);
+      // console.log(node);
+      // const nodeIndex = savedData.nodes.findIndex(item => item.id === this.nodeId);
+      // const shapeIndex = this.shapes.findIndex(item => item.id === this.nodeId);
+      // savedData.nodes[nodeIndex].entityText = this.shapes[shapeIndex].text;
+      this.shapes.forEach(item => {
+        const node = savedData.nodes.filter(v => v.id === item.id);
+        // console.log(node);
+        
+        if (node.length) {
+          node[0].entityText = item.text;
+        }
+      });
+      this.models.push(savedData);
+      // console.log(this.models);
+      // console.log('click');
     }
   },
 };

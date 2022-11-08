@@ -5,8 +5,20 @@
     <div class="d-flex">
       <div class="form-group pe-1">
         <button type="button" class="btn btn-primary me-1" v-on:click="newModel"><i class="fa-regular fa-file"></i> New</button>
+      </div>
+      <div class="form-group pe-1" v-if="selectedModel === ''">
         <button type="button" class="btn btn-primary me-1" data-bs-toggle="modal" data-bs-target="#saveModelModal"><i class="fa-regular fa-floppy-disk"></i> Save</button>
-        <!-- <button type="button" class="btn btn-light" v-on:click="loadModel">Load</button> -->
+      </div>
+      <div class="form-group pe-1" v-else>
+        <div class="dropdown">
+          <button class="btn btn-primary dropdown-toggle me-1" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+            <i class="fa-regular fa-floppy-disk"></i> Save
+          </button>
+          <ul class="dropdown-menu">
+            <li><button class="dropdown-item" type="button" data-bs-toggle="modal" data-bs-target="#saveModelModal">Save as New Model</button></li>
+            <li><button class="dropdown-item" type="button" v-on:click="updateModel">Update Model</button></li>
+          </ul>
+        </div>
       </div>
       <div class="form-group">
         <select class="form-select" aria-label="Default select example" v-model="selectedModel" v-on:change="changeModel">
@@ -205,8 +217,10 @@ export default {
           let node;
           // console.log(this.selectedModel);
           if (this.shapes.length) {
+            // New model
             node = this.shapes.find(item => item.id === this.nodeId);
-          } else if (this.selectedModel !== '') {
+          }  else if (this.selectedModel !== '') {
+            // Existing model
             node = this.selectedModel.nodes.find(item => item.id === this.nodeId);
           }
           // console.log(this.shapes);
@@ -325,7 +339,8 @@ export default {
     },
 
     newModel () {
-      diagramInstance.clear();
+      // diagramInstance.clear();
+      this.reset();
     },
 
     changeModel () {
@@ -348,6 +363,10 @@ export default {
     // },
 
     saveShape () {
+      if (this.selectedModel !== '') {
+        this.shapes = this.selectedModel.nodes;
+      }
+      // console.log(shapes);
       const index = this.shapes.findIndex(item => item.id === this.nodeId);
       if (index === -1 ) {
         this.shapes.push({
@@ -358,6 +377,41 @@ export default {
         this.shapes[index].entityText = this.shapeText;
       }
       console.log(this.shapes);
+    },
+
+    updateModel () {
+      let diagram = document.getElementById('diagram');
+      diagram = diagram.ej2_instances[0];
+      const data = diagram.saveDiagram();
+      const savedData = JSON.parse(data);
+      savedData.name = this.selectedModel.name;
+      // console.log(this.shapes);
+      if (this.shapes.length) {
+        // after updating existing model
+        this.shapes.forEach(item => {
+          const node = savedData.nodes.filter(v => v.id === item.id);
+          // console.log(node);
+          
+          if (node.length) {
+            node[0].entityText = item.entityText;
+          }
+        });
+      } else {
+        // before updating existing model
+        this.selectedModel.nodes.forEach(item => {
+          const node = savedData.nodes.filter(v => v.id === item.id);
+          // console.log(node);
+          
+          if (node.length) {
+            node[0].entityText = item.entityText;
+          }
+        });
+      }
+      const itemIndex = this.models.findIndex(item => item.name === this.selectedModel.name);
+      // console.log(itemIndex);
+      // console.log(savedData);
+      this.models[itemIndex] = savedData;
+      this.reset();
     },
     
     saveModel () {
@@ -384,6 +438,10 @@ export default {
       });
       this.models.push(savedData);
       // console.log(this.models);
+      this.reset();
+    },
+
+    reset () {
       // resetting everything
       this.nodeId = '';
       this.shapeText = '';

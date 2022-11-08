@@ -1,23 +1,29 @@
 <template>
   <!-- Main container -->
   <div class="container py-4">
-    <h2>Basic planning</h2>
-    <button type="button" class="btn btn-light" v-on:click="newModel">New</button>
-    <button type="button" class="btn btn-light" v-on:click="saveModel">Save</button>
-    <!-- <button type="button" class="btn btn-light" v-on:click="loadModel">Load</button> -->
-    <select class="form-select" aria-label="Default select example" v-model="selectedModel" v-on:change="changeModel">
-      <option disabled value="" selected>Please select one</option>
-      <option v-for="option in models" v-bind:value="option">
-        {{ option.name }}
-      </option>
-    </select>
-    <div>
+    <h2 class="mb-4">Basic planning</h2>
+    <div class="d-flex">
+      <div class="form-group pe-1">
+        <button type="button" class="btn btn-primary me-1" v-on:click="newModel"><i class="fa-regular fa-file"></i> New</button>
+        <button type="button" class="btn btn-primary me-1" data-bs-toggle="modal" data-bs-target="#saveModelModal"><i class="fa-regular fa-floppy-disk"></i> Save</button>
+        <!-- <button type="button" class="btn btn-light" v-on:click="loadModel">Load</button> -->
+      </div>
+      <div class="form-group">
+        <select class="form-select" aria-label="Default select example" v-model="selectedModel" v-on:change="changeModel">
+          <option disabled value="" selected>Select Model</option>
+          <option v-for="option in models" v-bind:value="option">
+            {{ option.name }}
+          </option>
+        </select>
+      </div>
+    </div>
+    <!-- <div>
       <ejs-toolbar id='toolbar' style="width:100%; height: 10%; margin-top: 10px;"
         :clicked='toolbarclicked'
         :items='toolbaritems'>
       </ejs-toolbar>
-    </div>
-    <div class="row">
+    </div> -->
+    <div class="row mt-4">
       <div class="col-lg-12 control-section">
         <div id="diagramEventsControlSection" class="content-wrapper" style="width:100%;background: white">
           <div id="diagram-space" class="sb-mobile-diagram">
@@ -53,15 +59,15 @@
         </div>
       </div>
     </div>
-    <div id="upload-container">
+    <!-- <div id="upload-container">
       <ejs-uploader id="fileupload" name="UploadFiles"       
         :asyncSettings='fileuploadasyncSettings'
         :success='fileuploadsuccess'
         :showFileList ='showFile'/>
-    </div>
+    </div> -->
 
     <!-- Button trigger modal -->
-    <!-- <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal">
+    <!-- <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#entityModal">
       Open modal
     </button> -->
 
@@ -69,7 +75,7 @@
       Open modal
     </button>  -->
 
-    <div class="modal fade" id="exampleModal" tabindex="-1">
+    <div class="modal fade" id="entityModal" tabindex="-1">
       <div class="modal-dialog">
         <div class="modal-content">
           <div class="modal-header">
@@ -78,11 +84,29 @@
           </div>
           <div class="modal-body">
             <input type="text" class="form-control" placeholder="Enter text" v-model="shapeText" />
-            <p>You've written: </p>
+            <!-- <p>You've written: </p> -->
           </div>
           <div class="modal-footer">
             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
             <button type="button" class="btn btn-primary" data-bs-dismiss="modal" v-on:click="saveShape">Save</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal fade" id="saveModelModal" tabindex="-1">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">Save Model</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <input type="text" class="form-control" placeholder="Name of your Model" v-model="modelName" />
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            <button type="button" class="btn btn-primary" data-bs-dismiss="modal" v-on:click="saveModel">Save</button>
           </div>
         </div>
       </div>
@@ -119,7 +143,7 @@ let diagramInstance;
 let basicShapes = [
   { id: 'Rectangle Box', shape: { type: 'Basic', shape: 'Rectangle' } },
   { id: 'Ellipse', shape: { type: 'Basic', shape: 'Ellipse' } }, 
-  { id: 'Text', shape: { type: 'Basic', shape: 'Text' }, annotations: [{content: 'Text'}] },
+  // { id: 'Text', shape: { type: 'Basic', shape: 'Text' }, annotations: [{content: 'Text'}] },
   { id: 'Parallelogram', shape: { type: 'Basic', shape: 'Parallelogram' } },
   { id: 'Triangle', shape: { type: 'Basic', shape: 'Triangle' } },
   { id: 'Hexagon', shape: { type: 'Basic', shape: 'Hexagon' } },
@@ -130,9 +154,17 @@ let basicShapes = [
   { id: 'Octagon', shape: { type: 'Basic', shape: 'Octagon' } },
   { id: 'Trapezoid', shape: { type: 'Basic', shape: 'Trapezoid' } },
   { id: 'Decagon', shape: { type: 'Basic', shape: 'Decagon' } },
-  { id: 'RightTriangle', shape: { type: 'Basic', shape: 'RightTriangle' } },
+  // { id: 'RightTriangle', shape: { type: 'Basic', shape: 'RightTriangle' } },
   { id: 'Diamond', shape: { type: 'Basic', shape: 'Diamond' } },
-  { id: 'Star', shape: { type: 'Basic', shape: 'Star' } }
+  { id: 'Star', shape: { type: 'Basic', shape: 'Star' } },
+  {
+    id: "Line",
+    type: "Straight",
+    sourcePoint: { x: 0, y: 0 },
+    targetPoint: { x: 40, y: 40 },
+    style: { strokeWidth: 2, strokeColor: "#757575" },
+    targetDecorator: { shape: "None" }
+  }
 ];
 
 export default {
@@ -143,8 +175,10 @@ export default {
       nodeId: '',
       shapeText: '',
       selectedModel: '',
+      modelName: '',
       shapes: [],
       models: [],
+      nodeClick: false,
       //Initializes diagram control
       width: "100%",
       height: 700,
@@ -154,6 +188,7 @@ export default {
       //diagram events
       click: (args) => {
         if (args.actualObject !== undefined) {
+          this.nodeClick = true;
           console.log('click on Node');
           // Name of the node
           // const nodeName = args.element.properties.annotations[0].properties.content;
@@ -166,20 +201,29 @@ export default {
           //   // const text = item.nodes.find(x => x.id === this.nodeId);
           //   console.log(item.nodes);
           // });
-          const node = this.shapes.find(item => item.id === this.nodeId);
-          // console.log(node);
-          node !== undefined ? this.shapeText = node.text : this.shapeText = '';
+          // const node = this.shapes.find(item => item.id === this.nodeId);
+          let node;
+          // console.log(this.selectedModel);
+          if (this.shapes.length) {
+            node = this.shapes.find(item => item.id === this.nodeId);
+          } else if (this.selectedModel !== '') {
+            node = this.selectedModel.nodes.find(item => item.id === this.nodeId);
+          }
           // console.log(this.shapes);
-          // this.shapes.length ? 
-          //   this.shapeText = this.shapes.find(item => item.id === this.nodeId).text
-          //   : this.shapeText = ''
+          console.log(node);
+          node !== undefined ? this.shapeText = node.entityText : this.shapeText = '';
+          // console.log(this.shapeText);
+          // console.log(this.shapes);
         } else {
+          this.nodeClick = false;
           console.log('Click on Diagram');
         }
         console.log(args);
       },
       doubleClick: (args) => {
-        this.openModal();
+        if (this.nodeClick) {
+          this.openModal();
+        }
       },
     
       // Initialize palette
@@ -213,48 +257,48 @@ export default {
           return { description: { text: symbol.text, overflow: 'Wrap' }};
         }
         return { description: { text: symbol.id }};
-      },
-      toolbarclicked: (args) => {
-        if (args.item.text === "New") {
-          diagramInstance.clear();
-        } else if (args.item.text === "Load") {
-          let element = document.getElementsByClassName(
-            "e-file-select-wrap"
-          );
-          let htmlButtonElement = element[0].querySelector(
-            "button"
-          );
-          htmlButtonElement.click();
-        } else if (args.item.id === 'palette-icon') {
-          openPalette();
-        } else {
-          download(diagramInstance.saveDiagram());
-        }
-      },
-      toolbaritems: [
-        { text: "New", tooltipText: "New", },
-        {
-          type: "Separator"
-        },
-        {
-          text: "Save",
-          tooltipText: "Save",
-        },
-        {
-          type: "Separator"
-        },
-        {
-          text: "Load",
-          tooltipText: "Load"
-        }
-      ],
-      fileuploadasyncSettings: {
-        saveUrl: "https://aspnetmvc.syncfusion.com/services/api/uploadbox/Save",
-        removeUrl:
-          "https://aspnetmvc.syncfusion.com/services/api/uploadbox/Remove"
-      },
-      fileuploadsuccess: onUploadSuccess,
-      showFile: true
+      }
+      // toolbarclicked: (args) => {
+      //   if (args.item.text === "New") {
+      //     diagramInstance.clear();
+      //   } else if (args.item.text === "Load") {
+      //     let element = document.getElementsByClassName(
+      //       "e-file-select-wrap"
+      //     );
+      //     let htmlButtonElement = element[0].querySelector(
+      //       "button"
+      //     );
+      //     htmlButtonElement.click();
+      //   } else if (args.item.id === 'palette-icon') {
+      //     openPalette();
+      //   } else {
+      //     download(diagramInstance.saveDiagram());
+      //   }
+      // },
+      // toolbaritems: [
+      //   { text: "New", tooltipText: "New", },
+      //   {
+      //     type: "Separator"
+      //   },
+      //   {
+      //     text: "Save",
+      //     tooltipText: "Save",
+      //   },
+      //   {
+      //     type: "Separator"
+      //   },
+      //   {
+      //     text: "Load",
+      //     tooltipText: "Load"
+      //   }
+      // ],
+      // fileuploadasyncSettings: {
+      //   saveUrl: "https://aspnetmvc.syncfusion.com/services/api/uploadbox/Save",
+      //   removeUrl:
+      //     "https://aspnetmvc.syncfusion.com/services/api/uploadbox/Remove"
+      // },
+      // fileuploadsuccess: onUploadSuccess,
+      // showFile: true
     };
   },
   provide: {
@@ -272,7 +316,7 @@ export default {
   },
   methods: {
     openModal () {
-      $('#exampleModal').modal('show');
+      $('#entityModal').modal('show');
     },
 
     paletteExpanding: (args) => {
@@ -289,6 +333,11 @@ export default {
       let diagram = document.getElementById('diagram');
       diagram = diagram.ej2_instances[0];
       diagram.loadDiagram(JSON.stringify(this.selectedModel));
+
+      // resetting
+      this.nodeId = '';
+      this.shapeText = '';
+      this.shapes = [];
     },
 
     // loadModel (event) {
@@ -303,10 +352,10 @@ export default {
       if (index === -1 ) {
         this.shapes.push({
           id: this.nodeId,
-          text: this.shapeText
+          entityText: this.shapeText
         });
       } else {
-        this.shapes[index].text = this.shapeText;
+        this.shapes[index].entityText = this.shapeText;
       }
       console.log(this.shapes);
     },
@@ -319,6 +368,7 @@ export default {
       const savedData = JSON.parse(data);
       // const node = savedData.nodes.find(item => item.id === this.nodeId);
       // node.entityText = this.shapeText;
+      savedData.name = this.modelName;
       console.log(savedData);
       // console.log(node);
       // const nodeIndex = savedData.nodes.findIndex(item => item.id === this.nodeId);
@@ -329,39 +379,45 @@ export default {
         // console.log(node);
         
         if (node.length) {
-          node[0].entityText = item.text;
+          node[0].entityText = item.entityText;
         }
       });
       this.models.push(savedData);
       // console.log(this.models);
-      // console.log('click');
+      // resetting everything
+      this.nodeId = '';
+      this.shapeText = '';
+      this.selectedModel = '';
+      this.modelName = '';
+      this.shapes = [];
+      diagramInstance.clear();
     }
   },
 };
 
 //save the diagram object in json data.
-function download(data) {
-  let dataStr =
-    "data:text/json;charset=utf-8," + encodeURIComponent(data);
-  let a = document.createElement("a");
-  a.href = dataStr;
-  a.download = "Diagram.json";
-  document.body.appendChild(a);
-  a.click();
-}
+// function download(data) {
+//   let dataStr =
+//     "data:text/json;charset=utf-8," + encodeURIComponent(data);
+//   let a = document.createElement("a");
+//   a.href = dataStr;
+//   a.download = "Diagram.json";
+//   document.body.appendChild(a);
+//   a.click();
+// }
 
-function onUploadSuccess(args) {
-  let file1  = args.file;
-  let file= file1.rawFile;
-  let reader = new FileReader();
-  reader.readAsText(file);
-  reader.onloadend = loadDiagram;
-}
+// function onUploadSuccess(args) {
+//   let file1  = args.file;
+//   let file= file1.rawFile;
+//   let reader = new FileReader();
+//   reader.readAsText(file);
+//   reader.onloadend = loadDiagram;
+// }
 
-//Load the diagraming object.
-function loadDiagram(event) {
-  diagramInstance.loadDiagram((event.target).result);
-}
+// //Load the diagraming object.
+// function loadDiagram(event) {
+//   diagramInstance.loadDiagram((event.target).result);
+// }
 
 </script>
 

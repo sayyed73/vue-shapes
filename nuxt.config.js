@@ -23,6 +23,12 @@ export default {
         rel: 'stylesheet',
         type: "text/css",
         href: 'https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css'
+      },
+      {
+        rel: 'stylesheet',
+        href: 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.0/css/all.min.css',
+        crossorigin: 'anonymous',
+        type: "text/css"
       }
     ],
     script: [
@@ -30,6 +36,11 @@ export default {
       { src: 'https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js' }
     ]
   },
+
+  // Global CSS (https://go.nuxtjs.dev/config-css)
+  css: [
+    '~/assets/css/site.css',
+  ],
 
   // Auto import components (https://go.nuxtjs.dev/config-components)
   components: true,

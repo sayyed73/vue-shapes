@@ -91,7 +91,7 @@
       <div class="modal-dialog">
         <div class="modal-content">
           <div class="modal-header">
-            <h5 class="modal-title">Entity</h5>
+            <h5 class="modal-title">{{ modalTitle }}</h5>
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
           </div>
           <div class="modal-body">
@@ -183,7 +183,7 @@ export default {
   name: "Home",
   data() {
     return {
-      // modalTitle: '',
+      modalTitle: '',
       nodeId: '',
       shapeText: '',
       selectedModel: '',
@@ -219,13 +219,20 @@ export default {
           if (this.shapes.length) {
             // New model
             node = this.shapes.find(item => item.id === this.nodeId);
-          }  else if (this.selectedModel !== '') {
+          } else if (this.selectedModel !== '') {
             // Existing model
             node = this.selectedModel.nodes.find(item => item.id === this.nodeId);
           }
           // console.log(this.shapes);
           console.log(node);
           node !== undefined ? this.shapeText = node.entityText : this.shapeText = '';
+          if (this.nodeId !== undefined && this.nodeId.includes('group')) {
+            // console.log('group');
+            this.modalTitle = 'Group';
+          } else {
+            // console.log('not group')
+            this.modalTitle = 'Entity';
+          }
           // console.log(this.shapeText);
           // console.log(this.shapes);
         } else {
